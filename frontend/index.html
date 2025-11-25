@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动抢课监控系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 自动抢课监控系统</h1>
+            <div class="status-indicator">
+                <span id="statusDot" class="dot"></span>
+                <span id="statusText">未运行</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- 配置面板 -->
+            <section class="card config-panel">
+                <h2>⚙️ 系统配置</h2>
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="token">Token (Bearer Token):</label>
+                        <input type="text" id="token" name="token" placeholder="Bearer xxx" required>
+                        <small>从浏览器开发者工具中获取Authorization头</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sleepTime">扫描频率 (秒):</label>
+                        <input type="number" id="sleepTime" name="sleep_time" min="1" max="60" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="minId">最小课程ID:</label>
+                        <input type="number" id="minId" name="min_id" min="1" value="100" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maxId">最大课程ID:</label>
+                        <input type="number" id="maxId" name="max_id" min="1" value="999" required>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="autoApply" name="auto_apply" checked>
+                            自动抢课（勾选后满足条件自动抢课）
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">保存配置</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 控制面板 -->
+            <section class="card control-panel">
+                <h2>🎮 控制面板</h2>
+                <div class="control-buttons">
+                    <button id="startBtn" class="btn btn-success">启动监控</button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>停止监控</button>
+                    <button id="refreshBtn" class="btn btn-secondary">刷新状态</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">扫描次数</div>
+                        <div class="stat-value" id="scanCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">成功次数</div>
+                        <div class="stat-value success" id="successCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">失败次数</div>
+                        <div class="stat-value error" id="failCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">最后扫描</div>
+                        <div class="stat-value" id="lastScanTime">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 课程列表 -->
+            <section class="card courses-panel">
+                <div class="panel-header">
+                    <h2>📚 课程列表</h2>
+                    <button id="refreshCoursesBtn" class="btn btn-sm">刷新</button>
+                </div>
+                <div id="coursesList" class="courses-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </section>
+
+            <!-- 日志面板 -->
+            <section class="card logs-panel">
+                <div class="panel-header">
+                    <h2>📋 运行日志</h2>
+                    <button id="clearLogsBtn" class="btn btn-sm btn-danger">清空日志</button>
+                </div>
+                <div id="logsContainer" class="logs-container">
+                    <div class="log-empty">暂无日志</div>
+                </div>
+            </section>
+
+            <!-- 历史记录 -->
+            <section class="card history-panel">
+                <div class="panel-header">
+                    <h2>📜 抢课历史</h2>
+                    <button id="clearHistoryBtn" class="btn btn-sm btn-danger">清空历史</button>
+                </div>
+                <div id="historyContainer" class="history-container">
+                    <div class="history-empty">暂无历史记录</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,8 @@
+{
+  "token": "Bearer YOUR_TOKEN_HERE",
+  "sleep_time": 2,
+  "min_id": 100,
+  "max_id": 999,
+  "auto_apply": true
+}
+
