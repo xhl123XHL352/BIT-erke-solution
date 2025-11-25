@@ -27,11 +27,12 @@ erke/
 │   ├── style.css        # 样式文件
 │   └── app.js           # 前端逻辑
 ├── tools/               # 工具脚本
-│   ├── capture_token.py    # Token自动捕获脚本
-│   ├── verify_token.py     # Token验证脚本
-│   ├── start_capture.bat   # Windows启动脚本
-│   ├── start_capture.sh    # Linux/Mac启动脚本
-│   └── README.md           # 工具使用说明
+│   ├── verify_token.py        # Token验证脚本
+│   ├── setup_fiddler.bat      # Fiddler配置助手
+│   ├── remove_proxy.bat       # 清除系统代理
+│   ├── fiddler_capture_guide.md  # Fiddler抓包详细指南
+│   ├── fiddler_auto_extract.js   # Fiddler自动提取Token脚本
+│   └── README.md               # 工具使用说明
 ├── start_backend.bat    # 后端启动脚本（Windows）
 ├── start_backend.sh     # 后端启动脚本（Linux/Mac）
 ├── start_frontend.bat   # 前端启动脚本（Windows）
@@ -45,7 +46,8 @@ erke/
 
 - Python 3.7+
 - 现代浏览器（Chrome、Edge、Firefox等）
-- 手机和电脑在同一WiFi网络（用于获取Token）
+- 微信PC版（用于获取Token）
+- Fiddler Classic（免费版，用于抓包）
 
 ### 第一步：安装依赖
 
@@ -63,67 +65,59 @@ pip3 install -r requirements.txt
 
 ### 第二步：获取Token（重要！）
 
-由于课程系统是微信小程序，无法直接在浏览器中访问，需要使用抓包工具获取Token。
+由于课程系统是微信小程序，需要使用Fiddler在电脑微信中抓包获取Token。
 
-#### 方法一：使用自动抓包脚本（推荐）✨
+#### 使用Fiddler抓包（推荐）✨
 
-1. **安装mitmproxy**
-   ```bash
-   cd tools
-   pip install mitmproxy
-   ```
+1. **安装Fiddler**
+   - 下载地址：https://www.telerik.com/fiddler
+   - 安装Fiddler Classic（免费版）
 
-2. **运行自动捕获脚本**
-   - **Windows**: 双击 `start_capture.bat`
-   - **Linux/Mac**: 
-     ```bash
-     chmod +x start_capture.sh
-     ./start_capture.sh
-     ```
-   - **或直接运行**:
-     ```bash
-     python capture_token.py
-     ```
+2. **配置Fiddler**
+   - 启动Fiddler
+   - 菜单栏：`Tools` → `Options` → `HTTPS` 标签
+   - 勾选 `Decrypt HTTPS traffic`
+   - 勾选 `Ignore server certificate errors`
+   - 点击 `Actions` → `Export Root Certificate to Desktop`（导出证书到桌面）
 
-3. **配置手机代理**
-   - 脚本会显示本机IP地址（例如：192.168.1.100）
-   - 在手机WiFi设置中配置代理：
-     - 服务器：电脑IP地址
-     - 端口：8080
-   - 保存设置
+3. **安装证书到系统**
+   - 双击桌面上的 `FiddlerRoot.cer` 文件
+   - 点击"安装证书" → 选择"本地计算机" → 下一步
+   - 选择"将所有证书都放入下列存储" → 浏览 → 选择"受信任的根证书颁发机构" → 确定 → 完成
 
-4. **安装证书（重要！）**
-   - 在手机浏览器访问 `http://mitm.it`
-   - 根据手机系统下载对应的证书
-   - **Android**: 下载后直接安装
-   - **iOS**: 下载后需要在"设置 → 通用 → 关于本机 → 证书信任设置"中信任证书
+4. **配置系统代理（自动配置）**
+   - 以管理员身份运行 `tools/setup_fiddler.bat`
+   - 或手动设置：
+     - Windows设置 → 网络和Internet → 代理
+     - 手动代理设置：地址 `127.0.0.1`，端口 `8888`
 
-5. **捕获Token**
-   - 在微信中打开课程系统小程序
-   - 访问课程列表页面
-   - Token会自动捕获并保存到 `tools/token.txt` 文件
-   - 控制台会显示捕获信息
+5. **重启微信**
+   - 完全关闭微信（包括后台进程）
+   - 重新启动微信
 
-6. **验证Token（可选）**
+6. **捕获Token**
+   - 在Fiddler底部输入框输入：`qcbldekt.bit.edu.cn`（用于过滤）
+   - 在微信中打开课程系统小程序，访问课程列表页面
+   - 在Fiddler中找到 `qcbldekt.bit.edu.cn` 的请求
+   - 点击请求，在右侧 `Headers` 标签中找到 `Authorization` 字段
+   - 复制完整内容（例如：`Bearer 517196|E8m5blSrtgMfwYzu34rklcaSdamO34gwUWReRIPd`）
+
+7. **保存Token**
+   - 将Token保存到 `tools/token.txt` 文件
+   - 或直接复制到抢课系统配置中
+
+8. **验证Token（可选）**
    ```bash
    cd tools
    python verify_token.py
    ```
 
-#### 方法二：使用Charles/Fiddler（手动抓包）
+9. **清除代理（使用完毕后）**
+   - 运行 `tools/remove_proxy.bat` 清除系统代理
+   - 或手动关闭系统代理设置
 
-1. 安装Charles或Fiddler抓包工具
-2. 启动抓包工具，记录代理端口（默认8888）
-3. 在手机WiFi设置中配置代理（服务器：电脑IP，端口：8888）
-4. 安装证书：
-   - **Charles**: 手机浏览器访问 `chls.pro/ssl`
-   - **Fiddler**: 手机浏览器访问 `电脑IP:8888`
-5. 在微信中打开小程序，访问课程列表
-6. 在抓包工具中找到 `qcbldekt.bit.edu.cn` 的请求
-7. 查看Request Headers中的 `Authorization` 字段
-8. 复制完整内容（例如：`Bearer 517196|E8m5blSrtgMfwYzu34rklcaSdamO34gwUWReRIPd`）
-
-> 💡 **详细说明**: 更多抓包方法请查看 `tools/README.md`
+> 💡 **详细说明**: 完整抓包指南请查看 `tools/fiddler_capture_guide.md`  
+> 💡 **自动提取**: 可以使用 `tools/fiddler_auto_extract.js` 脚本自动提取Token（见指南）
 
 ### 第三步：启动后端服务
 
@@ -267,26 +261,28 @@ python3 -m http.server 8000
 - 检查浏览器控制台是否有错误信息
 - 尝试使用Chrome或Edge浏览器
 
-### 问题5：无法捕获Token
+### 问题5：Fiddler中看不到微信请求
 
-**症状**: 运行抓包脚本但无法捕获Token
-
-**解决方法**:
-- 检查手机代理是否正确配置
-- 确认证书已安装并信任（iOS需要额外在系统设置中信任）
-- 确保手机和电脑在同一WiFi网络
-- 检查防火墙是否阻止了8080端口
-- 尝试在微信中重新访问课程列表
-
-### 问题6：证书安装失败
-
-**症状**: 无法访问 `http://mitm.it` 或证书无法安装
+**症状**: 在Fiddler中看不到微信小程序的请求
 
 **解决方法**:
-- 确保手机代理设置正确
-- 如果无法访问mitm.it，检查代理配置
-- iOS需要在"设置 → 通用 → 关于本机 → 证书信任设置"中信任证书
-- 尝试重新配置代理和安装证书
+- 确认系统代理已设置为 127.0.0.1:8888
+- 完全关闭微信后重新启动
+- 检查Fiddler是否在监听8888端口（Tools → Options → Connections）
+- 确认Fiddler中已勾选 `Decrypt HTTPS traffic`
+- 尝试以管理员身份运行Fiddler
+- 检查防火墙是否阻止了Fiddler
+
+### 问题6：微信无法连接网络
+
+**症状**: 配置代理后微信无法连接网络
+
+**解决方法**:
+- 检查系统代理设置是否正确（127.0.0.1:8888）
+- 确认Fiddler正在运行
+- 重新安装Fiddler证书到系统
+- 重启微信
+- 如果问题持续，尝试清除代理后重新配置
 
 ## 📡 API接口文档
 
